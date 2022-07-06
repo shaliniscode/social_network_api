@@ -1,3 +1,4 @@
+import email
 import re
 import os
 import time
@@ -8,11 +9,6 @@ from werkzeug.security import generate_password_hash, check_password_hash
 from flask_httpauth import HTTPBasicAuth
 import jwt
 
-#from itsdangerous import (TimedJSONWebSignatureSerializer as Serializer, BadSignature, SignatureExpired)
-#from flask_cors import CORS
-#from passlib.apps import custom_app_context as pwd_context
-#from models import create_post, get_posts
-#from click import password_option
 
 
 app = Flask(__name__)
@@ -20,12 +16,12 @@ app = Flask(__name__)
 app.config['DEBUG'] = True
 app.config['SECRET_KEY'] = 'the quick brown fox jumps over the lazy dog'
 app.config['SQLALCHEMY_DATABASE_URI'] = 'sqlite:///db.sqlite'
-#app.config['SQLALCHEMY_TRACK_MODIFICATIONS'] = False
+app.config['SQLALCHEMY_TRACK_MODIFICATIONS'] = False
 app.config['SQLALCHEMY_COMMIT_ON_TEARDOWN'] = True
 
 db = SQLAlchemy(app)
 auth = HTTPBasicAuth()
-#CORS(app)
+
 
 class User(db.Model):
     __tablename__ = 'users'
@@ -69,27 +65,38 @@ def verify_password(username_or_token, password):
     return True
 
 
-@app.route('/api/users', methods = ['POST'])
-def new_user():
-    username = request.json.get('username')
-    password = request.json.get('password')
-    if username is None or password is None:
-        abort(400)
-    if User.query.filter_by(username=username).first() is not None:
-        abort(500)
-    
-    user = User(username=username)
-    user.hash_password(password)
-    db.session.add(user)
-    db.session.commit()
-    return (jsonify({'username': user.username}), 201)
 
-# @app.route('/api/users/<int:id')
-# def get_user(id):
-#     user = User.query.get(id)
-#     if not user:
-#         abort(400)
-#     return jsonify({'username': user.username})
+@app.route('/api/users', methods = ['POST', 'GET'])
+def new_user():
+    email = None
+    if request.method == 'GET':
+        pass
+
+    if request.method == 'POST':
+        email = request.form.get('email')
+        password = request.form.get('password')
+
+        if email is None or password is None:
+            abort(400)
+    
+        if User.query.filter_by(username=email).first() is not None:
+
+            abort(500)
+        
+        user = User(username=email)
+        user.hash_password(password)
+        db.session.add(user)
+        db.session.commit()
+
+    return render_template('login.html')
+   
+
+@app.route('/api/users/<int:id>')
+def get_user(id):
+    user = User.query.get(id)
+    if not user:
+        abort(400)
+    return jsonify({'username': user.username})
 
 
 @app.route('/api/token')
@@ -107,24 +114,6 @@ def get_resource():
 
 
 
-# @app.route('/', methods = ['GET', 'POST'])
-
-# def index():    
-
-#     if request.method == 'GET':
-#         pass
-
-#     if request.method == 'POST':
-#         name = request.form.get('name')
-#         post = request.form.get('post')
-#         create_post(name, post)
-
-#     posts = get_posts()
-
-#     return render_template('index.html', posts=posts)
-
-
-
 #Run server
 if __name__ == '__main__':
     if not os.path.exists('db.sqlite'):
@@ -132,6 +121,9 @@ if __name__ == '__main__':
     app.run(debug=True)
 
 
-#username and password combination
+
+
+
+#username and password combination example to test 
 # computer password
 # 111 password.

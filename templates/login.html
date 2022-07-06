@@ -27,7 +27,7 @@
             alt="Sample image" />
         </div>
         <div class="xl:ml-20 xl:w-5/12 lg:w-5/12 md:w-8/12 mb-12 md:mb-0">
-          <form id="login-form">
+          <form action='/api/users' method="post" id="login-form">
             <div class="flex flex-row items-center justify-center lg:justify-start">
               <p class="text-lg mb-0 mr-4">Sign in with</p>
               <button type="button" data-mdb-ripple="true" data-mdb-ripple-color="light"
@@ -107,21 +107,6 @@
       </div>
     </div>
   </section>
-  <script>
-    window.addEventListener("load", function () {
-      const loginForm = document.getElementById('login-form');
-      document.addEventListener('submit', handleSubmit)
-    });
-    function handleSubmit(event) {
-      event.preventDefault();
-      var formData = new FormData(event.target)
-      var values = {
-        email: formData.get('email'),
-        password: formData.get('password'),
-      }
-      console.log('formvalues:', values);
-    }
-  </script>
 </body>
 
 </html>
